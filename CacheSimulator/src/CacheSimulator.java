@@ -16,14 +16,13 @@ public class CacheSimulator {
     private static final int LEAST_RECENT = 5;
     private static final int FILE = 6;
     private int[] arguments;
-
+    private Scanner trace;
     /**
      * Constructor.
      * @param args command line arguments
      */
     public CacheSimulator(String[] args) {
         arguments = new int[NUM_ARGS - 1];
-        Scanner trace;
         try {
             arguments[NUM_SETS] = Integer.parseInt(args[NUM_SETS]);
             arguments[NUM_BLOCKS] = Integer.parseInt(args[NUM_BLOCKS]);
@@ -41,7 +40,6 @@ public class CacheSimulator {
         }
         this.testValidity(arguments);
     }
-
     /**
      * Tests validity of arguments.
      * @param args int arguments
@@ -54,7 +52,6 @@ public class CacheSimulator {
         this.testLastThree(arguments[W_THROUGH]);
         this.testLastThree(arguments[LEAST_RECENT]);
     }
-
     /**
      * Tests first 2 args.
      * @param i int
@@ -65,7 +62,6 @@ public class CacheSimulator {
             System.exit(0);
         }
     }
-
     /**
      * Tests 3rd arg.
      * @param i int
@@ -76,7 +72,6 @@ public class CacheSimulator {
             System.exit(0);
         }
     }
-
     /**
      * Tests last 3 args.
      * @param i int
@@ -87,7 +82,26 @@ public class CacheSimulator {
             System.exit(0);
         }
     }
-
+    /**
+     * Scans through the trace file acting accordingly.
+     */
+    public void lineByLine() {
+        while (trace.hasNextLine()) {
+            String line = trace.nextLine();
+            this.parseLine(line);
+        }
+    }
+    /**
+     * Parses each individual line.
+     * @param line line to parse
+     */
+    public void parseLine(String line) {
+        Scanner lineScan = new Scanner(line);
+        while (lineScan.hasNext()) {
+            System.out.print(lineScan.next());
+        }
+        lineScan.close();
+    }
     /**
      * Main method.
      * @param args command line arguments
@@ -103,6 +117,7 @@ public class CacheSimulator {
             System.exit(0);
         }
         CacheSimulator cache = new CacheSimulator(args);
+        cache.lineByLine();
     }
 
 }
