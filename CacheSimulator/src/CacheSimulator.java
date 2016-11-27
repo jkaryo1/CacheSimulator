@@ -44,7 +44,7 @@ public class CacheSimulator {
      * Tests validity of arguments.
      * @param args int arguments
      */
-    public void testValidity(int[] args) {
+    private void testValidity(int[] args) {
         this.testFirstTwo(arguments[NUM_SETS]);
         this.testFirstTwo(arguments[NUM_BLOCKS]);
         this.testThird(arguments[NUM_BYTES]);
@@ -56,7 +56,7 @@ public class CacheSimulator {
      * Tests first 2 args.
      * @param i int
      */
-    public void testFirstTwo(int i) {
+    private void testFirstTwo(int i) {
         if (i <= 0 || (i % 2 != 0 && i != 1)) {
             System.err.println("Invalid parameter.");
             System.exit(0);
@@ -66,7 +66,7 @@ public class CacheSimulator {
      * Tests 3rd arg.
      * @param i int
      */
-    public void testThird(int i) {
+    private void testThird(int i) {
         if (i < 2 * 2 || i % 2 != 0) {
             System.err.println("Invalid parameter.");
             System.exit(0);
@@ -76,7 +76,7 @@ public class CacheSimulator {
      * Tests last 3 args.
      * @param i int
      */
-    public void testLastThree(int i) {
+    private void testLastThree(int i) {
         if (i != 0 && i != 1) {
             System.err.println("Invalid parameter.");
             System.exit(0);
@@ -95,12 +95,65 @@ public class CacheSimulator {
      * Parses each individual line.
      * @param line line to parse
      */
-    public void parseLine(String line) {
+    private void parseLine(String line) {
         Scanner lineScan = new Scanner(line);
-        while (lineScan.hasNext()) {
-            System.out.print(lineScan.next());
+        String command = "";
+        String address = "";
+        if (lineScan.hasNext()) {
+            command = lineScan.next();
+        } else {
+            System.err.println("Invalid trace file.");
+            System.exit(0);
+        }
+        if (lineScan.hasNext()) {
+            address = lineScan.next();
+        } else {
+            System.err.println("Invalid trace file.");
+            System.exit(0);
+        }
+        if (lineScan.hasNext()) {
+            lineScan.next();
+        } else {
+            System.err.println("Invalid trace file.");
+            System.exit(0);
+        }
+        if (lineScan.hasNext()) {
+            System.err.println("Invalid trace file.");
+            System.exit(0);
         }
         lineScan.close();
+        this.processTrace(command, address);
+    }
+    /**
+     * Processes whether to load or store.
+     * @param command load or store
+     * @param address the address
+     */
+    private void processTrace(String command, String address) {
+        if (command.equals("l") || command.equals("L")) {
+            this.load(address);
+        } else if (command.equals("s") || command.equals("S")) {
+            this.store(address);
+        } else {
+            System.err.println("Invalid trace file.");
+            System.exit(0);
+        }
+    }
+    /**
+     * Load address.
+     * @param address to load
+     */
+    private void load(String address) {
+        System.out.println("Load: " + address);
+        return;
+    }
+    /**
+     * Store address.
+     * @param address to store
+     */
+    private void store(String address) {
+        System.out.println("Store: " + address);
+        return;
     }
     /**
      * Main method.
