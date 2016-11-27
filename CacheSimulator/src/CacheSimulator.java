@@ -1,6 +1,9 @@
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.File;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * @author Jon Karyo jkaryo1
@@ -17,6 +20,7 @@ public class CacheSimulator {
     private static final int FILE = 6;
     private int[] arguments;
     private Scanner trace;
+    private Map<Long, Map<Long, Boolean>> cache;
     /**
      * Constructor.
      * @param args command line arguments
@@ -39,6 +43,11 @@ public class CacheSimulator {
             System.exit(0);
         }
         this.testValidity(arguments);
+        cache = new HashMap<Long, Map<Long, Boolean>>();
+        for (int i = 0; i < arguments[NUM_SETS]; i++) {
+            cache.put(Integer.toUnsignedLong(i),
+                    new LinkedHashMap<Long, Boolean>());
+        }
     }
     /**
      * Tests validity of arguments.
@@ -169,8 +178,8 @@ public class CacheSimulator {
             System.err.println("Incorrect number of arguments.");
             System.exit(0);
         }
-        CacheSimulator cache = new CacheSimulator(args);
-        cache.lineByLine();
+        CacheSimulator sim = new CacheSimulator(args);
+        sim.lineByLine();
     }
 
 }
