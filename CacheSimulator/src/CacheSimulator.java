@@ -22,7 +22,7 @@ public class CacheSimulator {
      * @param args command line arguments
      */
     public CacheSimulator(String[] args) {
-        arguments = new int[NUM_ARGS];
+        arguments = new int[NUM_ARGS - 1];
         Scanner trace;
         try {
             arguments[NUM_SETS] = Integer.parseInt(args[NUM_SETS]);
@@ -34,8 +34,57 @@ public class CacheSimulator {
             trace = new Scanner(new File(args[FILE]));
         } catch (NumberFormatException e) {
             System.err.println("Illegal number in argument.");
+            System.exit(0);
         } catch (FileNotFoundException e) {
             System.err.println("File not found.");
+            System.exit(0);
+        }
+        this.testValidity(arguments);
+    }
+
+    /**
+     * Tests validity of arguments.
+     * @param args int arguments
+     */
+    public void testValidity(int[] args) {
+        this.testFirstTwo(arguments[NUM_SETS]);
+        this.testFirstTwo(arguments[NUM_BLOCKS]);
+        this.testThird(arguments[NUM_BYTES]);
+        this.testLastThree(arguments[W_ALLOCATE]);
+        this.testLastThree(arguments[W_THROUGH]);
+        this.testLastThree(arguments[LEAST_RECENT]);
+    }
+
+    /**
+     * Tests first 2 args.
+     * @param i int
+     */
+    public void testFirstTwo(int i) {
+        if (i <= 0 || (i % 2 != 0 && i != 1)) {
+            System.err.println("Invalid parameter.");
+            System.exit(0);
+        }
+    }
+
+    /**
+     * Tests 3rd arg.
+     * @param i int
+     */
+    public void testThird(int i) {
+        if (i < 2 * 2 || i % 2 != 0) {
+            System.err.println("Invalid parameter.");
+            System.exit(0);
+        }
+    }
+
+    /**
+     * Tests last 3 args.
+     * @param i int
+     */
+    public void testLastThree(int i) {
+        if (i != 0 && i != 1) {
+            System.err.println("Invalid parameter.");
+            System.exit(0);
         }
     }
 
@@ -51,6 +100,7 @@ public class CacheSimulator {
             }
         } catch (IllegalArgumentException e) {
             System.err.println("Incorrect number of arguments.");
+            System.exit(0);
         }
         CacheSimulator cache = new CacheSimulator(args);
     }
