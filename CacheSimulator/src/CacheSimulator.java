@@ -221,6 +221,8 @@ public class CacheSimulator {
         decimal = decimal >> setBits;
         if (!store) {
             this.loadCache(setIndex, decimal);
+        } else {
+            this.storeCache(setIndex, decimal);
         }
     }
     private String addressValidity(String address) {
@@ -255,7 +257,34 @@ public class CacheSimulator {
             cache.put(setIndex, currSet);
         }
     }
-
+    private void storeCache(Long setIndex, Long tag) {
+        Map<Long, Boolean> currSet = cache.get(setIndex);
+        if (currSet.containsKey(tag)) {
+            storeHits++;
+            totalCycles++;
+            if (this.wThrough == 1) {
+                totalCycles += (HUNDRED * this.numBytes / FOUR);
+            } else {
+                currSet.remove(tag);
+                currSet.put(tag, true);
+                cache.put(setIndex, currSet);
+            }
+        } else {
+            storeMisses++;
+            if (wAllocate == 1) {
+                totalCycles += (HUNDRED * this.numBytes / FOUR);
+                currSet.put(tag, false);
+                cache.put(setIndex, currSet);
+                if (this.wThrough == 1) {
+                    totalCycles += (HUNDRED * this.numBytes / FOUR);
+                } else {
+                    currSet.remove(tag);
+                    currSet.put(tag, true);
+                    cache.put(setIndex, currSet);
+                }
+            }
+        }
+    }
     /**
      * Prints results.
      */
