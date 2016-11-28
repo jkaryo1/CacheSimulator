@@ -60,13 +60,13 @@ public class CacheSimulator {
             System.err.println("File not found.");
             System.exit(0);
         }
-        this.testValidity(arguments);
         numSets = arguments[NUM_SETS];
         numBlocks = arguments[NUM_BLOCKS];
         numBytes = arguments[NUM_BYTES];
         wAllocate = arguments[W_ALLOCATE];
         wThrough = arguments[W_THROUGH];
         leastRecent = arguments[LEAST_RECENT];
+        this.testValidity(arguments);
         boolean lru = false;
         if (leastRecent == 1) {
             lru = true;
