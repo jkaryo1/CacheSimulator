@@ -250,6 +250,7 @@ public class CacheSimulator {
         if (currSet.containsKey(tag)) {
             loadHits++;
             totalCycles++;
+            currSet.get(tag);
         } else {
             loadMisses++;
             totalCycles += (HUNDRED * numBytes / FOUR) + 1;
@@ -262,6 +263,7 @@ public class CacheSimulator {
         if (currSet.containsKey(tag)) {
             storeHits++;
             totalCycles++;
+            currSet.get(tag);
             if (wThrough == 1) {
                 totalCycles += (HUNDRED * numBytes / FOUR);
             } else {
