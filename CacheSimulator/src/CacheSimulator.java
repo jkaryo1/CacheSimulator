@@ -10,7 +10,9 @@ import java.util.LinkedHashMap;
  */
 public class CacheSimulator {
 
+    //Size arguments array should be
     private static final int NUM_ARGS = 7;
+    //Array index of each necessary parameter
     private static final int NUM_SETS = 0;
     private static final int NUM_BLOCKS = 1;
     private static final int NUM_BYTES = 2;
@@ -18,11 +20,17 @@ public class CacheSimulator {
     private static final int W_THROUGH = 4;
     private static final int LEAST_RECENT = 5;
     private static final int FILE = 6;
+    //Bytes in an address
     private static final int ADDRESS_BYTES = 8;
+    //Bytes in a word
     private static final int FOUR = 4;
+    //Base for hex
     private static final int SIXTEEN = 16;
+    //Cycles for memory load/store
     private static final int HUNDRED = 100;
+    //All possible hex digits
     private static final String HEX = "0123456789abcdefABCDEF";
+
     private int[] arguments;
     private Scanner trace;
     private Map<Long, Map<Long, Boolean>> cache;
@@ -46,12 +54,12 @@ public class CacheSimulator {
     public CacheSimulator(String[] args) {
         arguments = new int[NUM_ARGS - 1];
         try {
-            arguments[NUM_SETS] = Integer.parseInt(args[NUM_SETS]);
-            arguments[NUM_BLOCKS] = Integer.parseInt(args[NUM_BLOCKS]);
-            arguments[NUM_BYTES] = Integer.parseInt(args[NUM_BYTES]);
-            arguments[W_ALLOCATE] = Integer.parseInt(args[W_ALLOCATE]);
-            arguments[W_THROUGH] = Integer.parseInt(args[W_THROUGH]);
-            arguments[LEAST_RECENT] = Integer.parseInt(args[LEAST_RECENT]);
+            numSets = Integer.parseInt(args[NUM_SETS]);
+            numBlocks = Integer.parseInt(args[NUM_BLOCKS]);
+            numBytes = Integer.parseInt(args[NUM_BYTES]);
+            wAllocate = Integer.parseInt(args[W_ALLOCATE]);
+            wThrough = Integer.parseInt(args[W_THROUGH]);
+            leastRecent = Integer.parseInt(args[LEAST_RECENT]);
             trace = new Scanner(new File(args[FILE]));
         } catch (NumberFormatException e) {
             System.err.println("Illegal number in argument.");
@@ -60,19 +68,20 @@ public class CacheSimulator {
             System.err.println("File not found.");
             System.exit(0);
         }
+        /*
         numSets = arguments[NUM_SETS];
         numBlocks = arguments[NUM_BLOCKS];
         numBytes = arguments[NUM_BYTES];
         wAllocate = arguments[W_ALLOCATE];
         wThrough = arguments[W_THROUGH];
-        leastRecent = arguments[LEAST_RECENT];
+        leastRecent = arguments[LEAST_RECENT];*/
         testValidity(arguments);
         boolean lru = false;
         if (leastRecent == 1) {
             lru = true;
         }
         cache = new HashMap<Long, Map<Long, Boolean>>();
-        for (int i = 0; i < arguments[NUM_SETS]; i++) {
+        for (int i = 0; i < numSets; i++) {
             cache.put(Integer.toUnsignedLong(i),
                     new LinkedHashMap<Long, Boolean>(0, 1, lru) {
                     private static final long serialVersionUID = 1L;
