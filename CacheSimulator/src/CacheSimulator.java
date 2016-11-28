@@ -274,7 +274,7 @@ public class CacheSimulator {
         } else {
             storeMisses++;
             if (wAllocate == 1) {
-                totalCycles += (HUNDRED * numBytes / FOUR) + 1;
+                totalCycles += (HUNDRED * numBytes / FOUR);
                 currSet.put(tag, false);
                 cache.put(setIndex, currSet);
                 if (wThrough == 1) {
