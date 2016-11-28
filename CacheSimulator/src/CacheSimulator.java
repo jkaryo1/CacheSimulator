@@ -19,7 +19,9 @@ public class CacheSimulator {
     private static final int LEAST_RECENT = 5;
     private static final int FILE = 6;
     private static final int ADDRESS_BYTES = 8;
+    private static final int FOUR = 4;
     private static final int SIXTEEN = 16;
+    private static final int HUNDRED = 100;
     private static final String HEX = "0123456789abcdefABCDEF";
     private int[] arguments;
     private Scanner trace;
@@ -31,6 +33,12 @@ public class CacheSimulator {
     private int storeHits = 0;
     private int storeMisses = 0;
     private int totalCycles = 0;
+    private int numSets;
+    private int numBlocks;
+    private int numBytes;
+    private int wAllocate;
+    private int wThrough;
+    private int leastRecent;
     /**
      * Constructor.
      * @param args command line arguments
@@ -53,10 +61,33 @@ public class CacheSimulator {
             System.exit(0);
         }
         this.testValidity(arguments);
+        numSets = arguments[NUM_SETS];
+        numBlocks = arguments[NUM_BLOCKS];
+        numBytes = arguments[NUM_BYTES];
+        wAllocate = arguments[W_ALLOCATE];
+        wThrough = arguments[W_THROUGH];
+        leastRecent = arguments[LEAST_RECENT];
+        boolean lru = false;
+        if (leastRecent == 1) {
+            lru = true;
+        }
         cache = new HashMap<Long, Map<Long, Boolean>>();
         for (int i = 0; i < arguments[NUM_SETS]; i++) {
             cache.put(Integer.toUnsignedLong(i),
-                    new LinkedHashMap<Long, Boolean>());
+                    new LinkedHashMap<Long, Boolean>(0, 1, lru) {
+                    private static final long serialVersionUID = 1L;
+                    protected boolean
+                        removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
+                        boolean full = size() > numBlocks;
+                        if (full) {
+                            if (eldest.getValue()) {
+                                totalCycles += (HUNDRED * numBytes / FOUR);
+                            }
+                        }
+                        return full;
+                    }
+                }
+            );
         }
     }
     /**
@@ -64,64 +95,18 @@ public class CacheSimulator {
      * @param args int arguments
      */
     private void testValidity(int[] args) {
-        this.testFirstTwo(this.numSets());
-        this.testFirstTwo(this.numBlocks());
-        this.testThird(this.numBytes());
-        this.testLastThree(this.wAllocate());
-        this.testLastThree(this.wThrough());
-        this.testLastThree(this.leastRecent());
-        if (this.wAllocate() == 0 && this.wThrough() == 0) {
+        this.testFirstTwo(this.numSets);
+        this.testFirstTwo(this.numBlocks);
+        this.testThird(this.numBytes);
+        this.testLastThree(this.wAllocate);
+        this.testLastThree(this.wThrough);
+        this.testLastThree(this.leastRecent);
+        if (this.wAllocate == 0 && this.wThrough == 0) {
             this.parameterError();
         }
     }
-    /**
-     * Number of sets.
-     * @return numSets
-     */
-    public int numSets() {
-        return arguments[NUM_SETS];
-    }
-    /**
-     * Number of blocks.
-     * @return numBlocks
-     */
-    public int numBlocks() {
-        return arguments[NUM_BLOCKS];
-    }
-    /**
-     * Number of bytes.
-     * @return numBytes
-     */
-    public int numBytes() {
-        return arguments[NUM_BYTES];
-    }
-    /**
-     * Write allocate or not.
-     * @return wAllocate
-     */
-    public int wAllocate() {
-        return arguments[W_ALLOCATE];
-    }
-    /**
-     * Write-through or write-back.
-     * @return wThrough
-     */
-    public int wThrough() {
-        return arguments[W_THROUGH];
-    }
-    /**
-     * Least-recently-used or FIFO.
-     * @return leastRecent
-     */
-    public int leastRecent() {
-        return arguments[LEAST_RECENT];
-    }
-    /**
-     * Tests first 2 args.
-     * @param i int
-     */
     private void testFirstTwo(int i) {
-        if (i <= 0 || (i % 2 != 0 && i != 1)) {
+        if (i <= 0 || (i & (i - 1)) != 0) {
             this.parameterError();
         }
     }
@@ -130,7 +115,7 @@ public class CacheSimulator {
      * @param i int
      */
     private void testThird(int i) {
-        if (i < 2 * 2 || i % 2 != 0) {
+        if (i < FOUR || (i & (i - 1)) != 0) {
             this.parameterError();
         }
     }
@@ -225,14 +210,14 @@ public class CacheSimulator {
     private void processTag(String address, boolean store) {
         Long decimal = this.hexToDec(address);
         decimal = decimal
-                >> (int) Math.ceil(Math.log(this.numBytes()) / Math.log(2));
-        int setBits = (int) Math.ceil(Math.log(this.numSets()) / Math.log(2));
+                >> (int) Math.ceil(Math.log(this.numBytes) / Math.log(2));
+        int setBits = (int) Math.ceil(Math.log(this.numSets) / Math.log(2));
         Long setBitsLong = Integer.toUnsignedLong((int)
                 Math.pow(setBits, 2) - 1);
         Long setIndex = decimal & setBitsLong;
         decimal = decimal >> setBits;
         if (!store) {
-            this.accessCache(setIndex, decimal);
+            this.loadCache(setIndex, decimal);
         }
     }
     private String addressValidity(String address) {
@@ -255,10 +240,18 @@ public class CacheSimulator {
         Long decimal = Long.parseLong(hex, SIXTEEN);
         return decimal;
     }
-    private void accessCache(Long setIndex, Long tag) {
-        return;
+    private void loadCache(Long setIndex, Long tag) {
+        Map<Long, Boolean> currSet = cache.get(setIndex);
+        if (currSet.containsKey(tag)) {
+            loadHits++;
+            totalCycles++;
+        } else {
+            loadMisses++;
+            totalCycles += (HUNDRED * this.numBytes / FOUR);
+            currSet.put(tag, false);
+            cache.put(setIndex, currSet);
+        }
     }
-
 
     /**
      * Prints results.
