@@ -219,28 +219,30 @@ public class CacheSimulator {
         }
     }
     /**
-     * Check address validity.
      * Increment number of loads and process tag with store unset.
      * @param address to load
      */
     private void load(String address) {
-        //address = addressValidity(address);
         totalLoads++;
         processTag(address, false);
     }
     /**
-     * Check address validity.
      * Increment number of stores and process tag with store set.
      * @param address to store
      */
     private void store(String address) {
-        //address = addressValidity(address);
         totalStores++;
         processTag(address, true);
     }
+    /**
+     * Check address validity. Use bitshifting to get address index, tag.
+     * Appropriately call to either load or store.
+     * @param address the address
+     * @param store whether to store or just load
+     */
     private void processTag(String address, boolean store) {
         address = addressValidity(address);
-        Long decimal = hexToDec(address);
+        Long decimal = Long.parseLong(address, SIXTEEN);
         decimal = decimal
                 >> (int) (Math.log(numBytes) / Math.log(2));
         int setBits = (int) (Math.log(numSets) / Math.log(2));
@@ -254,6 +256,11 @@ public class CacheSimulator {
             storeCache(setIndex, decimal);
         }
     }
+    /**
+     * Checks if address is in valid form. Takes "0x" off.
+     * @param address the address
+     * @return solely hex version of address.
+     */
     private String addressValidity(String address) {
         if (!address.substring(0, 2).equals("0x")
                 && !address.substring(0, 2).equals("0X")) {
@@ -269,10 +276,6 @@ public class CacheSimulator {
             }
         }
         return address;
-    }
-    private Long hexToDec(String hex) {
-        Long decimal = Long.parseLong(hex, SIXTEEN);
-        return decimal;
     }
     private void loadCache(Long setIndex, Long tag) {
         Map<Long, Boolean> currSet = cache.get(setIndex);
