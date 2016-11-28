@@ -282,7 +282,8 @@ public class CacheSimulator {
      *  - access value of tag in case LRU
      * Else is a miss.
      *  - increment loadMisses
-     *  - increment totalCycles by (100 * number of words in a block) + 1
+     *  - stores to both memory and cache so increment totalCycles by
+     *    (100 * number of words in a block) + 1
      *  - put tag in cache (eldest will automatically be removed if necessary)
      * @param setIndex index of set
      * @param tag tag
@@ -308,9 +309,16 @@ public class CacheSimulator {
      *  - if write through, then memory is written
      *  - else dirty bit is set
      * Else is a miss.
-     *  - increment loadMisses
-     *  - increment totalCycles by (100 * number of words in a block) + 1
-     *  - put tag in cache (eldest will automatically be removed if necessary)
+     *  - increment storeMisses
+     *  - if write allocate:
+     *    - stores from memory and to cache so increment totalCycles by
+     *      (100 * number of words in a block) + 1
+     *    - put tag in cache (eldest will automatically be removed if necessary)
+     *    - if write-through:
+     *      - stores to memory so increment totalCycles by
+     *        (100 * number of words in a block)
+     *    - else:
+     *      - set dirty bit
      * @param setIndex index of set
      * @param tag tag
      */
@@ -323,7 +331,6 @@ public class CacheSimulator {
             if (wThrough == 1) {
                 totalCycles += (HUNDRED * numBytes / FOUR);
             } else {
-                currSet.remove(tag);
                 currSet.put(tag, true);
                 cache.put(setIndex, currSet);
             }
@@ -336,7 +343,6 @@ public class CacheSimulator {
                 if (wThrough == 1) {
                     totalCycles += (HUNDRED * numBytes / FOUR);
                 } else {
-                    //currSet.remove(tag);
                     currSet.put(tag, true);
                     cache.put(setIndex, currSet);
                 }
