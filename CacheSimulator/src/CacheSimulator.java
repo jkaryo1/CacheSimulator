@@ -209,7 +209,7 @@ public class CacheSimulator {
      * @param address to load
      */
     private void load(String address) {
-        this.addressValidity(address);
+        address = this.addressValidity(address);
         this.totalLoads++;
         this.processTag(address, false);
     }
@@ -218,7 +218,7 @@ public class CacheSimulator {
      * @param address to store
      */
     private void store(String address) {
-        this.addressValidity(address);
+        address = this.addressValidity(address);
         this.totalStores++;
         this.processTag(address, true);
     }
@@ -235,7 +235,7 @@ public class CacheSimulator {
             this.accessCache(setIndex, decimal);
         }
     }
-    private void addressValidity(String address) {
+    private String addressValidity(String address) {
         if (!address.substring(0, 2).equals("0x")
                 && !address.substring(0, 2).equals("0X")) {
             this.parseError();
@@ -249,6 +249,7 @@ public class CacheSimulator {
                 this.parseError();
             }
         }
+        return address;
     }
     private Long hexToDec(String hex) {
         Long decimal = Long.parseLong(hex, SIXTEEN);
