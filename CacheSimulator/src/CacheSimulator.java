@@ -66,7 +66,7 @@ public class CacheSimulator {
         wAllocate = arguments[W_ALLOCATE];
         wThrough = arguments[W_THROUGH];
         leastRecent = arguments[LEAST_RECENT];
-        this.testValidity(arguments);
+        testValidity(arguments);
         boolean lru = false;
         if (leastRecent == 1) {
             lru = true;
@@ -80,7 +80,7 @@ public class CacheSimulator {
                         removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
                         boolean full = size() >= numBlocks;
                         if (full) {
-                            if (eldest.getValue().equals(true)) {
+                            if (eldest.getValue()) {
                                 totalCycles += (HUNDRED * numBytes / FOUR);
                             }
                         }
@@ -95,20 +95,20 @@ public class CacheSimulator {
      * @param args int arguments
      */
     private void testValidity(int[] args) {
-        this.testFirstTwo(this.numSets);
-        this.testFirstTwo(this.numBlocks);
-        this.testThird(this.numBytes);
-        this.testLastThree(this.wAllocate);
-        this.testLastThree(this.wThrough);
-        this.testLastThree(this.leastRecent);
-        if (this.wAllocate == 0 && this.wThrough == 0) {
-            this.parameterError();
+        testFirstTwo(numSets);
+        testFirstTwo(numBlocks);
+        testThird(numBytes);
+        testLastThree(wAllocate);
+        testLastThree(wThrough);
+        testLastThree(leastRecent);
+        if (wAllocate == 0 && wThrough == 0) {
+            parameterError();
         }
     }
     private void testFirstTwo(int i) {
         if (i <= 0 || (i & (i - 1)) != 0) {
             System.out.println(i);
-            this.parameterError();
+            parameterError();
         }
     }
     /**
@@ -118,7 +118,7 @@ public class CacheSimulator {
     private void testThird(int i) {
         if (i < FOUR || (i & (i - 1)) != 0) {
             System.out.println("2");
-            this.parameterError();
+            parameterError();
         }
     }
     /**
@@ -128,7 +128,7 @@ public class CacheSimulator {
     private void testLastThree(int i) {
         if (i != 0 && i != 1) {
             System.out.println("3");
-            this.parameterError();
+            parameterError();
         }
     }
     private void parameterError() {
@@ -141,7 +141,7 @@ public class CacheSimulator {
     public void lineByLine() {
         while (trace.hasNextLine()) {
             String line = trace.nextLine();
-            this.parseLine(line);
+            parseLine(line);
         }
     }
     /**
@@ -155,23 +155,23 @@ public class CacheSimulator {
         if (lineScan.hasNext()) {
             command = lineScan.next();
         } else {
-            this.parseError();
+            parseError();
         }
         if (lineScan.hasNext()) {
             address = lineScan.next();
         } else {
-            this.parseError();
+            parseError();
         }
         if (lineScan.hasNext()) {
             lineScan.next();
         } else {
-            this.parseError();
+            parseError();
         }
         if (lineScan.hasNext()) {
-            this.parseError();
+            parseError();
         }
         lineScan.close();
-        this.processTrace(command, address);
+        processTrace(command, address);
     }
     private void parseError() {
         System.err.println("Invalid trace file.");
@@ -184,9 +184,9 @@ public class CacheSimulator {
      */
     private void processTrace(String command, String address) {
         if (command.equals("l") || command.equals("L")) {
-            this.load(address);
+            load(address);
         } else if (command.equals("s") || command.equals("S")) {
-            this.store(address);
+            store(address);
         } else {
             System.err.println("Invalid trace file.");
             System.exit(0);
@@ -197,46 +197,46 @@ public class CacheSimulator {
      * @param address to load
      */
     private void load(String address) {
-        address = this.addressValidity(address);
-        this.totalLoads++;
-        this.processTag(address, false);
+        address = addressValidity(address);
+        totalLoads++;
+        processTag(address, false);
     }
     /**
      * Store address.
      * @param address to store
      */
     private void store(String address) {
-        address = this.addressValidity(address);
-        this.totalStores++;
-        this.processTag(address, true);
+        address = addressValidity(address);
+        totalStores++;
+        processTag(address, true);
     }
     private void processTag(String address, boolean store) {
-        Long decimal = this.hexToDec(address);
+        Long decimal = hexToDec(address);
         decimal = decimal
-                >> (int) Math.ceil(Math.log(this.numBytes) / Math.log(2));
-        int setBits = (int) Math.ceil(Math.log(this.numSets) / Math.log(2));
+                >> (int) (Math.log(numBytes) / Math.log(2));
+        int setBits = (int) (Math.log(numSets) / Math.log(2));
         Long setBitsLong = Integer.toUnsignedLong((int)
-                Math.pow(setBits, 2) - 1);
+                Math.pow(2, setBits) - 1);
         Long setIndex = decimal & setBitsLong;
         decimal = decimal >> setBits;
         if (!store) {
-            this.loadCache(setIndex, decimal);
+            loadCache(setIndex, decimal);
         } else {
-            this.storeCache(setIndex, decimal);
+            storeCache(setIndex, decimal);
         }
     }
     private String addressValidity(String address) {
         if (!address.substring(0, 2).equals("0x")
                 && !address.substring(0, 2).equals("0X")) {
-            this.parseError();
+            parseError();
         }
         address = address.substring(2);
         if (address.length() != ADDRESS_BYTES) {
-            this.parseError();
+            parseError();
         }
         for (char c : address.toCharArray()) {
             if (HEX.indexOf(c) == -1) {
-                this.parseError();
+                parseError();
             }
         }
         return address;
@@ -252,7 +252,7 @@ public class CacheSimulator {
             totalCycles++;
         } else {
             loadMisses++;
-            totalCycles += (HUNDRED * this.numBytes / FOUR) + 1;
+            totalCycles += (HUNDRED * numBytes / FOUR) + 1;
             currSet.put(tag, false);
             cache.put(setIndex, currSet);
         }
@@ -262,8 +262,8 @@ public class CacheSimulator {
         if (currSet.containsKey(tag)) {
             storeHits++;
             totalCycles++;
-            if (this.wThrough == 1) {
-                totalCycles += (HUNDRED * this.numBytes / FOUR);
+            if (wThrough == 1) {
+                totalCycles += (HUNDRED * numBytes / FOUR);
             } else {
                 currSet.remove(tag);
                 currSet.put(tag, true);
@@ -272,11 +272,11 @@ public class CacheSimulator {
         } else {
             storeMisses++;
             if (wAllocate == 1) {
-                totalCycles += (HUNDRED * this.numBytes / FOUR) + 1;
+                totalCycles += (HUNDRED * numBytes / FOUR) + 1;
                 currSet.put(tag, false);
                 cache.put(setIndex, currSet);
-                if (this.wThrough == 1) {
-                    totalCycles += (HUNDRED * this.numBytes / FOUR);
+                if (wThrough == 1) {
+                    totalCycles += (HUNDRED * numBytes / FOUR);
                 } else {
                     totalCycles++;
                     currSet.remove(tag);
