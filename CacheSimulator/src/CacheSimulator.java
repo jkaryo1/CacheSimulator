@@ -29,7 +29,7 @@ public class CacheSimulator {
     //Cycles for memory load/store
     private static final int HUNDRED = 100;
     //All possible hex digits
-    private static final String HEX = "0123456789abcdefABCDEF";
+    //private static final String HEX = "0123456789abcdefABCDEF";
     //Scanner to read through trace file
     private Scanner trace;
     /*
@@ -242,7 +242,12 @@ public class CacheSimulator {
      */
     private void processTag(String address, boolean store) {
         address = addressValidity(address);
-        Long decimal = Long.parseLong(address, SIXTEEN);
+        Long decimal = 0L;
+        try {
+            decimal = Long.parseLong(address, SIXTEEN);
+        } catch (NumberFormatException e) {
+            parseError();
+        }
         decimal = decimal
                 >> (int) (Math.log(numBytes) / Math.log(2));
         int setBits = (int) (Math.log(numSets) / Math.log(2));
@@ -269,11 +274,6 @@ public class CacheSimulator {
         address = address.substring(2);
         if (address.length() != ADDRESS_BYTES) {
             parseError();
-        }
-        for (char c : address.toCharArray()) {
-            if (HEX.indexOf(c) == -1) {
-                parseError();
-            }
         }
         return address;
     }
