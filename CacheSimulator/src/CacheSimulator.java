@@ -78,7 +78,7 @@ public class CacheSimulator {
                     private static final long serialVersionUID = 1L;
                     protected boolean
                         removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
-                        boolean full = size() >= numBlocks;
+                        boolean full = size() > numBlocks;
                         if (full) {
                             if (eldest.getValue()) {
                                 totalCycles += (HUNDRED * numBytes / FOUR);
