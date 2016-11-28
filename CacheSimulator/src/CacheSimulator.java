@@ -274,13 +274,12 @@ public class CacheSimulator {
         } else {
             storeMisses++;
             if (wAllocate == 1) {
-                totalCycles += (HUNDRED * numBytes / FOUR);
+                totalCycles += (HUNDRED * numBytes / FOUR) + 1;
                 currSet.put(tag, false);
                 cache.put(setIndex, currSet);
                 if (wThrough == 1) {
                     totalCycles += (HUNDRED * numBytes / FOUR);
                 } else {
-                    totalCycles++;
                     currSet.remove(tag);
                     currSet.put(tag, true);
                     cache.put(setIndex, currSet);
