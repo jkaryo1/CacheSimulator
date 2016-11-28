@@ -107,7 +107,7 @@ public class CacheSimulator {
     }
     private void testFirstTwo(int i) {
         if (i <= 0 || (i & (i - 1)) != 0) {
-            System.out.println("1");
+            System.out.println(i);
             this.parameterError();
         }
     }
