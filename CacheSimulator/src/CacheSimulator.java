@@ -74,7 +74,7 @@ public class CacheSimulator {
         cache = new HashMap<Long, Map<Long, Boolean>>();
         for (int i = 0; i < arguments[NUM_SETS]; i++) {
             cache.put(Integer.toUnsignedLong(i),
-                    new LinkedHashMap<Long, Boolean>(0, 1, lru) {
+                    new LinkedHashMap<Long, Boolean>(0, 1, !lru) {
                     private static final long serialVersionUID = 1L;
                     protected boolean
                         removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
@@ -252,7 +252,7 @@ public class CacheSimulator {
             totalCycles++;
         } else {
             loadMisses++;
-            totalCycles += (HUNDRED * this.numBytes / FOUR);
+            totalCycles += (HUNDRED * this.numBytes / FOUR) + 1;
             currSet.put(tag, false);
             cache.put(setIndex, currSet);
         }
