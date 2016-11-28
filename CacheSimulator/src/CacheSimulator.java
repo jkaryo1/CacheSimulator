@@ -30,10 +30,17 @@ public class CacheSimulator {
     private static final int HUNDRED = 100;
     //All possible hex digits
     private static final String HEX = "0123456789abcdefABCDEF";
-
-    private int[] arguments;
+    //Scanner to read through trace file
     private Scanner trace;
+    /*
+     * Stores addresses in cache
+     * First Long is set index
+     * Inner map is a set
+     * Second long is tag
+     * Boolean is whether dirty bit
+     */
     private Map<Long, Map<Long, Boolean>> cache;
+    //Count info
     private int totalLoads = 0;
     private int totalStores = 0;
     private int loadHits = 0;
@@ -41,6 +48,7 @@ public class CacheSimulator {
     private int storeHits = 0;
     private int storeMisses = 0;
     private int totalCycles = 0;
+    //Command line arguments
     private int numSets;
     private int numBlocks;
     private int numBytes;
@@ -52,7 +60,6 @@ public class CacheSimulator {
      * @param args command line arguments
      */
     public CacheSimulator(String[] args) {
-        arguments = new int[NUM_ARGS - 1];
         try {
             numSets = Integer.parseInt(args[NUM_SETS]);
             numBlocks = Integer.parseInt(args[NUM_BLOCKS]);
@@ -68,19 +75,22 @@ public class CacheSimulator {
             System.err.println("File not found.");
             System.exit(0);
         }
-        /*
-        numSets = arguments[NUM_SETS];
-        numBlocks = arguments[NUM_BLOCKS];
-        numBytes = arguments[NUM_BYTES];
-        wAllocate = arguments[W_ALLOCATE];
-        wThrough = arguments[W_THROUGH];
-        leastRecent = arguments[LEAST_RECENT];*/
-        testValidity(arguments);
+        testValidity();
         boolean lru = false;
         if (leastRecent == 1) {
             lru = true;
         }
         cache = new HashMap<Long, Map<Long, Boolean>>();
+        /*
+         * Create the correct number of sets in the cache
+         * Each set is a LinkedHashMap, which keeps track of either least-
+         * recently-used or first entered.
+         * lru determines whether to use least-recently-used or FIFO
+         * removeEldestEntry is called after put, to see if the eldest value
+         * must be removed. Eldest is either lru of FIFO
+         * If the cache is overfilled and dirty bit is set, need 100 cycles to
+         * write to memory
+         */
         for (int i = 0; i < numSets; i++) {
             cache.put(Integer.toUnsignedLong(i),
                     new LinkedHashMap<Long, Boolean>(0, 1, lru) {
@@ -103,7 +113,7 @@ public class CacheSimulator {
      * Tests validity of arguments.
      * @param args int arguments
      */
-    private void testValidity(int[] args) {
+    private void testValidity() {
         testFirstTwo(numSets);
         testFirstTwo(numBlocks);
         testThird(numBytes);
@@ -114,32 +124,35 @@ public class CacheSimulator {
             parameterError();
         }
     }
+    /**
+     * If power of 2, i in binary will be in form 1000..0.
+     * So i - 1 will be in form 111...1.
+     * So bitwise AND should result in 0 if i is power of 2.
+     */
     private void testFirstTwo(int i) {
         if (i <= 0 || (i & (i - 1)) != 0) {
-            System.out.println(i);
             parameterError();
         }
     }
     /**
-     * Tests 3rd arg.
-     * @param i int
+     * Same as above.
      */
     private void testThird(int i) {
         if (i < FOUR || (i & (i - 1)) != 0) {
-            System.out.println("2");
             parameterError();
         }
     }
     /**
-     * Tests last 3 args.
-     * @param i int
+     * Must be 0 or 1.
      */
     private void testLastThree(int i) {
         if (i != 0 && i != 1) {
-            System.out.println("3");
             parameterError();
         }
     }
+    /**
+     * Exit program.
+     */
     private void parameterError() {
         System.err.println("Invalid parameter.");
         System.exit(0);
@@ -161,6 +174,7 @@ public class CacheSimulator {
         Scanner lineScan = new Scanner(line);
         String command = "";
         String address = "";
+        //Checks if file itself is in proper format
         if (lineScan.hasNext()) {
             command = lineScan.next();
         } else {
@@ -182,6 +196,9 @@ public class CacheSimulator {
         lineScan.close();
         processTrace(command, address);
     }
+    /**
+     * Exit program.
+     */
     private void parseError() {
         System.err.println("Invalid trace file.");
         System.exit(0);
@@ -202,24 +219,27 @@ public class CacheSimulator {
         }
     }
     /**
-     * Load address.
+     * Check address validity.
+     * Increment number of loads and process tag with store unset.
      * @param address to load
      */
     private void load(String address) {
-        address = addressValidity(address);
+        //address = addressValidity(address);
         totalLoads++;
         processTag(address, false);
     }
     /**
-     * Store address.
+     * Check address validity.
+     * Increment number of stores and process tag with store set.
      * @param address to store
      */
     private void store(String address) {
-        address = addressValidity(address);
+        //address = addressValidity(address);
         totalStores++;
         processTag(address, true);
     }
     private void processTag(String address, boolean store) {
+        address = addressValidity(address);
         Long decimal = hexToDec(address);
         decimal = decimal
                 >> (int) (Math.log(numBytes) / Math.log(2));
