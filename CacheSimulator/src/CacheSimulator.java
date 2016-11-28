@@ -107,6 +107,7 @@ public class CacheSimulator {
     }
     private void testFirstTwo(int i) {
         if (i <= 0 || (i & (i - 1)) != 0) {
+            System.out.println("1");
             this.parameterError();
         }
     }
@@ -116,6 +117,7 @@ public class CacheSimulator {
      */
     private void testThird(int i) {
         if (i < FOUR || (i & (i - 1)) != 0) {
+            System.out.println("2");
             this.parameterError();
         }
     }
@@ -125,6 +127,7 @@ public class CacheSimulator {
      */
     private void testLastThree(int i) {
         if (i != 0 && i != 1) {
+            System.out.println("3");
             this.parameterError();
         }
     }
