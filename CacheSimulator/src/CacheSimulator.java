@@ -74,11 +74,11 @@ public class CacheSimulator {
         cache = new HashMap<Long, Map<Long, Boolean>>();
         for (int i = 0; i < arguments[NUM_SETS]; i++) {
             cache.put(Integer.toUnsignedLong(i),
-                    new LinkedHashMap<Long, Boolean>(0, 1, !lru) {
+                    new LinkedHashMap<Long, Boolean>(0, 1, lru) {
                     private static final long serialVersionUID = 1L;
                     protected boolean
                         removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
-                        boolean full = size() > numBlocks;
+                        boolean full = size() >= numBlocks;
                         if (full) {
                             if (eldest.getValue()) {
                                 totalCycles += (HUNDRED * numBytes / FOUR);
