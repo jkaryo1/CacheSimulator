@@ -288,6 +288,7 @@ public class CacheSimulator {
         }
         CacheSimulator sim = new CacheSimulator(args);
         sim.lineByLine();
+        sim.printResults();
     }
 
 }
