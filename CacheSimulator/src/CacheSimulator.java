@@ -80,7 +80,7 @@ public class CacheSimulator {
                         removeEldestEntry(Map.Entry<Long, Boolean> eldest) {
                         boolean full = size() >= numBlocks;
                         if (full) {
-                            if (eldest.getValue()) {
+                            if (eldest.getValue().equals(true)) {
                                 totalCycles += (HUNDRED * numBytes / FOUR);
                             }
                         }
