@@ -28,8 +28,6 @@ public class CacheSimulator {
     private static final int SIXTEEN = 16;
     //Cycles for memory load/store
     private static final int HUNDRED = 100;
-    //All possible hex digits
-    //private static final String HEX = "0123456789abcdefABCDEF";
     //Scanner to read through trace file
     private Scanner trace;
     /*
@@ -277,6 +275,18 @@ public class CacheSimulator {
         }
         return address;
     }
+    /**
+     * If tag is in cache, it is a hit.
+     *  - increment loadHits
+     *  - increment totalCycles by 1
+     *  - access value of tag in case LRU
+     * Else is a miss.
+     *  - increment loadMisses
+     *  - increment totalCycles by (100 * number of words in a block) + 1
+     *  - put tag in cache (eldest will automatically be removed if necessary)
+     * @param setIndex index of set
+     * @param tag tag
+     */
     private void loadCache(Long setIndex, Long tag) {
         Map<Long, Boolean> currSet = cache.get(setIndex);
         if (currSet.containsKey(tag)) {
@@ -290,6 +300,20 @@ public class CacheSimulator {
             cache.put(setIndex, currSet);
         }
     }
+    /**
+     * If tag is in cache, it is a hit.
+     *  - increment storeHits
+     *  - increment totalCycles by 1
+     *  - access value of tag in case LRU
+     *  - if write through, then memory is written
+     *  - else dirty bit is set
+     * Else is a miss.
+     *  - increment loadMisses
+     *  - increment totalCycles by (100 * number of words in a block) + 1
+     *  - put tag in cache (eldest will automatically be removed if necessary)
+     * @param setIndex index of set
+     * @param tag tag
+     */
     private void storeCache(Long setIndex, Long tag) {
         Map<Long, Boolean> currSet = cache.get(setIndex);
         if (currSet.containsKey(tag)) {
@@ -312,7 +336,7 @@ public class CacheSimulator {
                 if (wThrough == 1) {
                     totalCycles += (HUNDRED * numBytes / FOUR);
                 } else {
-                    currSet.remove(tag);
+                    //currSet.remove(tag);
                     currSet.put(tag, true);
                     cache.put(setIndex, currSet);
                 }
