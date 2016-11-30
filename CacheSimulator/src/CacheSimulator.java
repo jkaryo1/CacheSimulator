@@ -98,7 +98,7 @@ public class CacheSimulator {
                         boolean full = size() > numBlocks;
                         if (full) {
                             if (eldest.getValue()) {
-                                totalCycles += (HUNDRED * numBytes / FOUR);
+                                totalCycles += (HUNDRED * numBytes / FOUR) + 1;
                             }
                         }
                         return full;
@@ -290,9 +290,9 @@ public class CacheSimulator {
      */
     private void loadCache(Long setIndex, Long tag) {
         Map<Long, Boolean> currSet = cache.get(setIndex);
+        totalCycles++;
         if (currSet.containsKey(tag)) {
             loadHits++;
-            totalCycles++;
             currSet.get(tag);
         } else {
             loadMisses++;
@@ -325,17 +325,32 @@ public class CacheSimulator {
     private void storeCache(Long setIndex, Long tag) {
         Map<Long, Boolean> currSet = cache.get(setIndex);
         if (currSet.containsKey(tag)) {
-            storeHits++;
             totalCycles++;
-            currSet.get(tag);
+            storeHits++;
             if (wThrough == 1) {
                 totalCycles += (HUNDRED * numBytes / FOUR);
+                currSet.get(tag);
             } else {
                 currSet.put(tag, true);
                 cache.put(setIndex, currSet);
             }
         } else {
             storeMisses++;
+            if (wThrough == 1) {
+                totalCycles += (HUNDRED * numBytes / FOUR);
+                if (wAllocate == 1) {
+                    totalCycles += (HUNDRED * numBytes / FOUR) + 2;
+                    currSet.put(tag, false);
+                    cache.put(setIndex, currSet);
+                }
+            } else {
+                if (wAllocate == 1) {
+                    currSet.put(tag, true);
+                    cache.put(setIndex, currSet);
+                    totalCycles += (HUNDRED * numBytes / FOUR) + 2;
+                }
+            }
+            /*
             if (wAllocate == 1) {
                 totalCycles += (HUNDRED * numBytes / FOUR) + 1;
                 currSet.put(tag, false);
@@ -346,7 +361,9 @@ public class CacheSimulator {
                     currSet.put(tag, true);
                     cache.put(setIndex, currSet);
                 }
-            }
+            } else {
+                totalCycles += (HUNDRED * numBytes / FOUR);
+            }*/
         }
     }
     /**
