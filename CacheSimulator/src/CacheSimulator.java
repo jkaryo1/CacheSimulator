@@ -310,15 +310,18 @@ public class CacheSimulator {
      *  - else dirty bit is set
      * Else is a miss.
      *  - increment storeMisses
-     *  - if write allocate:
-     *    - stores from memory and to cache so increment totalCycles by
-     *      (100 * number of words in a block) + 1
-     *    - put tag in cache (eldest will automatically be removed if necessary)
-     *    - if write-through:
-     *      - stores to memory so increment totalCycles by
-     *        (100 * number of words in a block)
-     *    - else:
+     *  - if write through:
+     *    - stores directly to memory regardless (+100 cycles)
+     *    - if write-allocate:
+     *      - loads block from memory to cache so increment totalCycles by
+     *        (100 * number of words in a block) + 1
+     *      - stores to cache (+1 cycle)
+     *  - else:
+     *    - if write allocate:
      *      - set dirty bit
+     *      - loads block from memory to cache so increment totalCycles by
+     *        (100 * number of words in a block) + 1
+     *      - stores to cache (+1 cycle)
      * @param setIndex index of set
      * @param tag tag
      */
@@ -350,20 +353,6 @@ public class CacheSimulator {
                     totalCycles += (HUNDRED * numBytes / FOUR) + 2;
                 }
             }
-            /*
-            if (wAllocate == 1) {
-                totalCycles += (HUNDRED * numBytes / FOUR) + 1;
-                currSet.put(tag, false);
-                cache.put(setIndex, currSet);
-                if (wThrough == 1) {
-                    totalCycles += (HUNDRED * numBytes / FOUR);
-                } else {
-                    currSet.put(tag, true);
-                    cache.put(setIndex, currSet);
-                }
-            } else {
-                totalCycles += (HUNDRED * numBytes / FOUR);
-            }*/
         }
     }
     /**
