@@ -1,3 +1,7 @@
+Jon Karyo
+jkaryo1
+HW6
+
 Problem 1:
 Test 1: matrix[i][j] time
 ________________________________________________________
@@ -203,3 +207,7 @@ matrix size increases where there are so many misses that further increasing
 size will have no significant effect. For small sizes, more arrays can exist in
 the cache, leading to improved performance. For higher levels of optimization,
 the miss rate is higher, but runtime is faster.
+
+
+Problem 2:
+Code is well documented.
