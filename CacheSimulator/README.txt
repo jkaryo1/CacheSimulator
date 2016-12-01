@@ -49,7 +49,8 @@ ________________________________________________________
 
 These results indicate that as matrix size doubles, the user time quadruples.
 User time is the amount of time spent on the processor running the program's
-code, so this is the important
+code, so this is the important number to look at. Further, as optimization
+increases to either O1 or O3, user time significantly decreases.
 
 Test 2: matrix[j][i] time
 ________________________________________________________
@@ -99,6 +100,16 @@ ________________________________________________________
       |  o4  |   1.523   |     0.549     |   0:02.07
       |      |   1.437   |     0.523     |   0:01.96
 
+These results indicate that as matrix size doubles, the user time significantly
+increases. Further, as optimization increases to either O1 or O3, user time
+significantly decreases, a result that is very noticeable in the 8192 and 16384
+cases. System time, however, is the exact same as in the matrix[i][j] case,
+indicating that this is not an ideal data point to study.
+
+Overall, switching the i and j significantly increases run time, but not to a
+constant proportion throughout all sizes. This causes me to believe that cache
+performance impacts this.
+
 Test 3: matrix[i][j] valgrind
 MR = miss rate in %
 Note: As size doubles, total refs quadruples
@@ -137,6 +148,10 @@ _______________________________________________________
       |  o4  |  0.00 |  0.00  | 25.0  |  24.9  |  5.0
 ------+------+-----------+---------------+-------------
 16384 does not run with valgrind's cachegrind
+
+An interesting result is that with no optimization, the miss rates stay constant
+as size increases. However, miss rates increase as optimization increases. As
+miss rates increase, runtime seems to decrease.
 
 Test 4: matrix[j][i] valgrind
 MR = miss rate in %
@@ -177,4 +192,14 @@ _______________________________________________________
 ------+------+-----------+---------------+-------------
 16384 does not run with valgrind's cachegrind
 
-Through these test
+The miss rates in this test are very high due to the reverse ordering of i and
+j. They are much higher than in test 3. The rates still tend to increase with
+matrix size, but near the end miss a very large portion.
+
+Overall, switching the i and j drastically changes performance. When this
+happens, an entirely new array has to be loaded into the cache before each entry
+into the matrix (since a matrix is an array of arrays). It gets to a point as
+matrix size increases where there are so many misses that further increasing
+size will have no significant effect. For small sizes, more arrays can exist in
+the cache, leading to improved performance. For higher levels of optimization,
+the miss rate is higher, but runtime is faster.
