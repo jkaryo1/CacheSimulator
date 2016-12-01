@@ -276,9 +276,9 @@ public class CacheSimulator {
         return address;
     }
     /**
+     * Regardless of hit or miss, increment totalCycles by 1.
      * If tag is in cache, it is a hit.
      *  - increment loadHits
-     *  - increment totalCycles by 1
      *  - access value of tag in case LRU
      * Else is a miss.
      *  - increment loadMisses
@@ -328,7 +328,7 @@ public class CacheSimulator {
             totalCycles++;
             storeHits++;
             if (wThrough == 1) {
-                totalCycles += (HUNDRED * numBytes / FOUR);
+                totalCycles += HUNDRED;
                 currSet.get(tag);
             } else {
                 currSet.put(tag, true);
@@ -337,7 +337,7 @@ public class CacheSimulator {
         } else {
             storeMisses++;
             if (wThrough == 1) {
-                totalCycles += (HUNDRED * numBytes / FOUR);
+                totalCycles += HUNDRED;
                 if (wAllocate == 1) {
                     totalCycles += (HUNDRED * numBytes / FOUR) + 2;
                     currSet.put(tag, false);
