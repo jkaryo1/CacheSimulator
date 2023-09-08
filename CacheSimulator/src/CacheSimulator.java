@@ -207,9 +207,9 @@ public class CacheSimulator {
      * @param address the address
      */
     private void processTrace(String command, String address) {
-        if (command.equals("l") || command.equals("L")) {
+        if ("l".equals(command) || "L".equals(command)) {
             load(address);
-        } else if (command.equals("s") || command.equals("S")) {
+        } else if ("s".equals(command) || "S".equals(command)) {
             store(address);
         } else {
             System.err.println("Invalid trace file.");
@@ -265,8 +265,8 @@ public class CacheSimulator {
      * @return solely hex version of address.
      */
     private String addressValidity(String address) {
-        if (!address.substring(0, 2).equals("0x")
-                && !address.substring(0, 2).equals("0X")) {
+        if (!"0x".equals(address.substring(0, 2))
+                && !"0X".equals(address.substring(0, 2))) {
             parseError();
         }
         address = address.substring(2);
